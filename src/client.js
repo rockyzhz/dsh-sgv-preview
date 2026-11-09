@@ -259,6 +259,21 @@ function SgvBody(props) {
     }
   }, [pdf])
 
+  const openInSgv = useCallback(async () => {
+    const file = parseFileAddress(resourceAddress)
+    if (!file) return
+    try {
+      await fetch('/api/dsh-sgv/open', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: file.sessionId, path: file.path }),
+        credentials: 'same-origin',
+      })
+    } catch (ignored) {
+      /* 打开失败时保持当前预览 */
+    }
+  }, [resourceAddress])
+
   const showHud = useCallback(() => {
     setHudVisible(true)
     if (hudTimer.current) clearTimeout(hudTimer.current)
@@ -387,7 +402,10 @@ function SgvBody(props) {
     whiteSpace: 'nowrap',
   }
 
-  return createElement('div', { style: outerStyle },
+  return createElement('div', {
+    style: outerStyle,
+    onMouseMove: (event) => { if (event.clientY <= 64) showHud() },
+  },
     body,
     createElement('div', {
       style: hudStyle,
@@ -401,6 +419,14 @@ function SgvBody(props) {
       createElement('button', { key: 'fit', type: 'button', style: buttonStyle, title: TEXT.fitWidth, onClick: () => setZoom(1) }, TEXT.fitWidth),
       createElement('span', { key: 'sep2', style: { width: 1, height: 14, background: 'currentColor', opacity: 0.18, margin: '0 4px' } }),
       createElement('span', { key: 'page', style: metaStyle }, currentPage + ' / ' + pageCount + ' ' + TEXT.pageOf),
+      createElement('span', { key: 'sep3', style: { width: 1, height: 14, background: 'currentColor', opacity: 0.18, margin: '0 4px' } }),
+      createElement('button', {
+        key: 'open',
+        type: 'button',
+        style: { ...buttonStyle, padding: '3px 9px', borderRadius: 6, background: themeName === 'dark' ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.06)' },
+        title: '用 SuperGoodViewer 完整应用打开',
+        onClick: openInSgv,
+      }, '在超好读中打开'),
     ]),
   )
 }
