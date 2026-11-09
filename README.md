@@ -31,22 +31,3 @@
 
 - SuperGoodViewer 便携版已解压在 \`%LOCALAPPDATA%\SuperGoodViewer\`，其中 \`sgv-cli.exe\`
   与 \`sogood_core.dll\` 必须同目录。
-
-## 界面
-
-预览由 PDF.js 自绘，而不是浏览器内置 PDF 查看器：
-
-- **默认无侧栏、无工具栏**，只显示文档本身；
-- **向上滚动**时顶部浮现 HUD（缩放 / 适应宽度 / 页码），**向下滚动**立即隐藏；
-- HUD 空闲 2.4 秒且鼠标离开后自动淡出；
-- 页面按视口懒渲染，缩放范围 40%–300%，默认适应面板宽度；
-- HUD 里的「在超好读中打开」会用 SuperGoodViewer 原生应用打开当前文件，完整功能（大纲、查找、演示、版式切换）仍由原生应用提供。
-
-## 开发
-
-\`\`\`bash
-pnpm install
-pnpm build      # 用 esbuild 把 src/client.js 打包成 lib/client.js
-\`\`\`
-
-\`lib/client.js\` 是构建产物，需要一并提交；DSH 启动时直接加载它。

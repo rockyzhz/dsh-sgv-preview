@@ -17,15 +17,6 @@
   },
   "files": [
     "lib",
-    "src",
-    "scripts",
     "README.md"
-  ],
-  "devDependencies": {
-    "esbuild": "^0.28.2",
-    "pdfjs-dist": "6.5.438"
-  },
-  "scripts": {
-    "build": "node scripts/build.mjs"
-  }
+  ]
 }
