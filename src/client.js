@@ -380,7 +380,7 @@ function SgvBody(props) {
       if (!el) return
       pdf.getPage(1).then((page) => {
         if (!alive) return
-        const viewport = page.getViewport({ scale: 1, rotation })
+        const viewport = page.getViewport({ scale: 1 })
         const availableWidth = Math.max(160, el.clientWidth - PAGE_GAP * 2)
         const availableHeight = Math.max(160, el.clientHeight - PAGE_GAP * 2)
         const widthScale = availableWidth / viewport.width
@@ -399,7 +399,7 @@ function SgvBody(props) {
       clearTimeout(timer)
       observer.disconnect()
     }
-  }, [pdf, rotation, fitMode, sidebarOpen])
+  }, [pdf, fitMode, sidebarOpen])
 
   const scrollToPage = useCallback((pageNumber) => {
     const el = scrollRef.current
