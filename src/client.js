@@ -146,6 +146,7 @@ function SgvBody(props) {
   const hudTimer = useRef(null)
   const lastScroll = useRef(0)
   const pdfRef = useRef(null)
+  const loadingTaskRef = useRef(null)
   const currentPageRef = useRef(1)
 
   const [status, setStatus] = useState('loading')
@@ -194,12 +195,13 @@ function SgvBody(props) {
         const loadingTask = getDocument({ data: new Uint8Array(buffer), isEvalSupported: false })
         const doc = await loadingTask.promise
         if (cancelled) {
-          try { doc.destroy() } catch (ignored) { /* 已取消 */ }
+          try { loadingTask.destroy() } catch (ignored) { /* 已取消 */ }
           return
         }
-        if (pdfRef.current) {
-          try { pdfRef.current.destroy() } catch (ignored) { /* 旧文档 */ }
+        if (loadingTaskRef.current) {
+          try { loadingTaskRef.current.destroy() } catch (ignored) { /* 旧文档 */ }
         }
+        loadingTaskRef.current = loadingTask
         pdfRef.current = doc
         setPdf(doc)
         setPageCount(doc.numPages)
@@ -222,10 +224,11 @@ function SgvBody(props) {
   }, [revision, resourceAddress, themeName])
 
   useEffect(() => () => {
-    if (pdfRef.current) {
-      try { pdfRef.current.destroy() } catch (ignored) { /* 卸载 */ }
-      pdfRef.current = null
+    if (loadingTaskRef.current) {
+      try { loadingTaskRef.current.destroy() } catch (ignored) { /* 卸载 */ }
+      loadingTaskRef.current = null
     }
+    pdfRef.current = null
     if (hudTimer.current) clearTimeout(hudTimer.current)
   }, [])
 
