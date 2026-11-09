@@ -276,7 +276,7 @@ function SgvBody(props) {
   const [baseScale, setBaseScale] = useState(1)
   const [zoom, setZoom] = useState(1)
   const [rotation, setRotation] = useState(0)
-  const [fitMode, setFitMode] = useState('page')
+  const [fitMode, setFitMode] = useState('width')
   const [hudVisible, setHudVisible] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageInput, setPageInput] = useState('1')
@@ -571,17 +571,20 @@ function SgvBody(props) {
   }
   const toolbarStyle = {
     position: 'absolute',
-    top: 8,
-    left: '50%',
-    transform: hudVisible ? 'translate(-50%, 0)' : 'translate(-50%, -160%)',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    transform: hudVisible ? 'translateY(0)' : 'translateY(-100%)',
     display: 'flex',
     alignItems: 'center',
     gap: 2,
-    padding: '4px 8px',
-    borderRadius: 9,
+    padding: '0 10px',
+    boxSizing: 'border-box',
+    borderRadius: 0,
     background: TOOLBAR_BG,
     color: TOOLBAR_FG,
-    boxShadow: '0 4px 18px rgba(0,0,0,.32)',
+    boxShadow: hudVisible ? '0 1px 8px rgba(0,0,0,.35)' : 'none',
     opacity: hudVisible ? 1 : 0,
     pointerEvents: hudVisible ? 'auto' : 'none',
     transition: 'opacity .18s ease, transform .18s ease',
@@ -707,7 +710,7 @@ function SgvBody(props) {
     createElement('span', { key: 'sep3', style: separator }),
     tool('download', ICONS.download, TEXT.download, downloadPdf),
     tool('print', ICONS.print, TEXT.print, printPdf),
-    createElement('div', { key: 'more', style: { position: 'relative' } },
+    createElement('div', { key: 'more', style: { position: 'relative', marginLeft: 'auto' } },
       tool('morebtn', ICONS.more, TEXT.more, () => setMoreOpen((value) => !value)),
       createElement('div', { style: menuStyle },
         createElement('button', {
