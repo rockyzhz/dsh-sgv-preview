@@ -24,7 +24,8 @@ const TEXT = {
   failed: '超好读渲染失败',
   retry: '重试',
   title: '超好读预览',
-  fitPage: '适合页面',
+  fitWidthLabel: '适应宽度',
+  fitHeightLabel: '适应高度',
   zoomIn: '放大',
   zoomOut: '缩小',
   rotate: '旋转',
@@ -40,7 +41,8 @@ const ICONS = {
   menu: 'M4 6h16M4 12h16M4 18h16',
   zoomOut: 'M5 12h14',
   zoomIn: 'M5 12h14M12 5v14',
-  fitPage: 'M5 5h14v14H5z M9 9h6v6H9z',
+  fitWidth: 'M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4',
+  fitHeight: 'M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4',
   rotate: 'M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6',
   download: 'M12 3v12m0 0l-4-4m4 4l4-4M4 21h16',
   print: 'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',
@@ -282,7 +284,6 @@ function SgvBody(props) {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageInput, setPageInput] = useState('1')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(false)
 
   useEffect(() => {
     if (!request) return undefined
@@ -381,8 +382,8 @@ function SgvBody(props) {
         const availableWidth = Math.max(160, el.clientWidth - PAGE_GAP * 2)
         const availableHeight = Math.max(160, el.clientHeight - PAGE_GAP * 2)
         const widthScale = availableWidth / viewport.width
-        const pageScale = Math.min(widthScale, availableHeight / viewport.height)
-        setBaseScale(fitMode === 'page' ? pageScale : widthScale)
+        const heightScale = availableHeight / viewport.height
+        setBaseScale(fitMode === 'height' ? heightScale : widthScale)
       }).catch(() => {})
     }
     compute()
@@ -406,7 +407,6 @@ function SgvBody(props) {
   }, [])
 
   const openInSgv = useCallback(async () => {
-    setMoreOpen(false)
     const file = parseFileAddress(resourceAddress)
     if (!file) return
     try {
@@ -422,7 +422,6 @@ function SgvBody(props) {
   }, [resourceAddress])
 
   const downloadPdf = useCallback(() => {
-    setMoreOpen(false)
     if (!pdfUrlRef.current) return
     const anchor = document.createElement('a')
     anchor.href = pdfUrlRef.current
@@ -433,7 +432,6 @@ function SgvBody(props) {
   }, [resourceAddress])
 
   const printPdf = useCallback(() => {
-    setMoreOpen(false)
     if (!pdfUrlRef.current) return
     const frame = document.createElement('iframe')
     frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden'
@@ -612,30 +610,6 @@ function SgvBody(props) {
     fontSize: 14,
     fontVariantNumeric: 'tabular-nums',
   }
-  const menuStyle = {
-    position: 'absolute',
-    top: 46,
-    right: 0,
-    minWidth: 190,
-    padding: 6,
-    borderRadius: 8,
-    background: TOOLBAR_BG,
-    boxShadow: '0 6px 22px rgba(0,0,0,.36)',
-    display: moreOpen ? 'block' : 'none',
-  }
-  const menuItemStyle = {
-    display: 'block',
-    width: '100%',
-    textAlign: 'left',
-    padding: '7px 10px',
-    border: 0,
-    borderRadius: 6,
-    background: 'transparent',
-    color: TOOLBAR_FG,
-    cursor: 'pointer',
-    font: '12px/1.3 system-ui, sans-serif',
-  }
-
   let body
   if (status === 'error') {
     body = createElement('div', { style: statusStyle }, [
@@ -707,30 +681,12 @@ function SgvBody(props) {
     ),
     tool('out', ICONS.zoomOut, TEXT.zoomOut, () => zoomBy(-0.1)),
     tool('in', ICONS.zoomIn, TEXT.zoomIn, () => zoomBy(0.1)),
-    tool('fit', ICONS.fitPage, TEXT.fitPage, () => { setFitMode('page'); setZoom(1) }),
+    tool('fitWidth', ICONS.fitWidth, TEXT.fitWidthLabel, () => { setFitMode('width'); setZoom(1) }),
+    tool('fitHeight', ICONS.fitHeight, TEXT.fitHeightLabel, () => { setFitMode('height'); setZoom(1) }),
     tool('rotate', ICONS.rotate, TEXT.rotate, () => setRotation((value) => (value + 90) % 360)),
     tool('download', ICONS.download, TEXT.download, downloadPdf),
     tool('print', ICONS.print, TEXT.print, printPdf),
     tool('open', ICONS.open, TEXT.openInApp, openInSgv),
-    createElement('div', { key: 'more', style: { position: 'relative' } },
-      tool('morebtn', ICONS.more, TEXT.more, () => setMoreOpen((value) => !value)),
-      createElement('div', { style: menuStyle },
-        createElement('button', {
-          type: 'button',
-          style: menuItemStyle,
-          onClick: () => { setFitMode('width'); setZoom(1); setMoreOpen(false) },
-          onMouseEnter: (event) => { event.currentTarget.style.background = 'rgba(255,255,255,.12)' },
-          onMouseLeave: (event) => { event.currentTarget.style.background = 'transparent' },
-        }, '适应宽度'),
-        createElement('button', {
-          type: 'button',
-          style: menuItemStyle,
-          onClick: () => { setFitMode('page'); setZoom(1); setMoreOpen(false) },
-          onMouseEnter: (event) => { event.currentTarget.style.background = 'rgba(255,255,255,.12)' },
-          onMouseLeave: (event) => { event.currentTarget.style.background = 'transparent' },
-        }, TEXT.fitPage),
-      ),
-    ),
   ])
 
   return createElement('div', {
