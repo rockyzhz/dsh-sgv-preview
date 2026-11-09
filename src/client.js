@@ -552,8 +552,8 @@ function SgvBody(props) {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 30,
-    height: 30,
+    width: 36,
+    height: 36,
     border: 0,
     borderRadius: 6,
     background: 'transparent',
@@ -564,7 +564,7 @@ function SgvBody(props) {
   }
   const separator = {
     width: 1,
-    height: 18,
+    height: 22,
     background: 'rgba(255,255,255,.24)',
     margin: '0 4px',
     flex: 'none',
@@ -574,12 +574,12 @@ function SgvBody(props) {
     top: 0,
     left: 0,
     right: 0,
-    height: 40,
+    height: 48,
     transform: hudVisible ? 'translateY(0)' : 'translateY(-100%)',
     display: 'flex',
     alignItems: 'center',
-    gap: 2,
-    padding: '0 10px',
+    gap: 4,
+    padding: '0 12px',
     boxSizing: 'border-box',
     borderRadius: 0,
     background: TOOLBAR_BG,
@@ -593,27 +593,28 @@ function SgvBody(props) {
     font: '12px/1.2 system-ui, -apple-system, Segoe UI, sans-serif',
   }
   const pageField = {
-    width: 26,
-    height: 22,
+    width: 32,
+    height: 28,
     border: 0,
     borderRadius: 4,
     background: '#2b2b2b',
     color: '#fff',
     textAlign: 'center',
-    font: '12px/1 system-ui, sans-serif',
+    font: '14px/1 system-ui, sans-serif',
     outline: 'none',
     padding: 0,
   }
   const pageTotal = {
-    margin: '0 6px 0 4px',
+    margin: '0 8px 0 5px',
     opacity: 0.8,
+    fontSize: 14,
     fontVariantNumeric: 'tabular-nums',
   }
   const menuStyle = {
     position: 'absolute',
-    top: 40,
+    top: 46,
     right: 0,
-    minWidth: 180,
+    minWidth: 190,
     padding: 6,
     borderRadius: 8,
     background: TOOLBAR_BG,
@@ -682,7 +683,7 @@ function SgvBody(props) {
     title,
     'aria-label': title,
     onClick,
-  }, createElement(Icon, { path }))
+  }, createElement(Icon, { path, size: 22 }))
 
   const toolbar = createElement('div', {
     style: toolbarStyle,
