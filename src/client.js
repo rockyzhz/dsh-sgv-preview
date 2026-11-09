@@ -28,7 +28,8 @@ const TEXT = {
   fitHeightLabel: '适应高度',
   zoomIn: '放大',
   zoomOut: '缩小',
-  rotate: '旋转',
+  toScroll: '切换到长卷轴',
+  toPaged: '切换到 A4 分页',
   download: '下载 PDF',
   print: '打印',
   more: '更多',
@@ -43,7 +44,8 @@ const ICONS = {
   zoomIn: 'M5 12h14M12 5v14',
   fitWidth: 'M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4',
   fitHeight: 'M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4',
-  rotate: 'M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6',
+  scroll: 'M4 5h16M4 9h16M4 13h16M4 17h16M4 21h9',
+  paged: 'M6 3h8l4 4v14H6zM14 3v4h4',
   download: 'M12 3v12m0 0l-4-4m4 4l4-4M4 21h16',
   print: 'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',
   more: 'M12 6h.01M12 12h.01M12 18h.01',
@@ -138,8 +140,9 @@ function PdfPage({ pdf, pageNumber, scale, rotation, theme }) {
     let task = null
     pdf.getPage(pageNumber).then((page) => {
       if (cancelled) return
-      const dpr = window.devicePixelRatio || 1
       const viewport = page.getViewport({ scale, rotation })
+      // 长卷轴是单页超长 PDF，限制画布像素避免超过浏览器上限。
+      const dpr = Math.min(window.devicePixelRatio || 1, Math.max(1, 16384 / Math.max(viewport.width, viewport.height)))
       canvas.width = Math.max(1, Math.floor(viewport.width * dpr))
       canvas.height = Math.max(1, Math.floor(viewport.height * dpr))
       canvas.style.width = viewport.width + 'px'
@@ -278,7 +281,7 @@ function SgvBody(props) {
   const [pageCount, setPageCount] = useState(0)
   const [baseScale, setBaseScale] = useState(1)
   const [zoom, setZoom] = useState(1)
-  const [rotation, setRotation] = useState(0)
+  const [layout, setLayout] = useState('a4')
   const [fitMode, setFitMode] = useState('width')
   const [hudVisible, setHudVisible] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -303,7 +306,7 @@ function SgvBody(props) {
         const response = await fetch(ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: file.sessionId, path: file.path, theme: themeName }),
+          body: JSON.stringify({ sessionId: file.sessionId, path: file.path, theme: themeName, format: layout }),
           signal: controller.signal,
           credentials: 'same-origin',
         })
@@ -335,7 +338,6 @@ function SgvBody(props) {
         setPdf(doc)
         setPageCount(doc.numPages)
         setZoom(1)
-        setRotation(0)
         setStatus('ready')
         setPageInput('1')
         currentPageRef.current = 1
@@ -354,7 +356,7 @@ function SgvBody(props) {
       cancelled = true
       controller.abort()
     }
-  }, [revision, resourceAddress, themeName])
+  }, [revision, resourceAddress, themeName, layout])
 
   useEffect(() => () => {
     if (loadingTaskRef.current) {
@@ -631,7 +633,6 @@ function SgvBody(props) {
         pdf,
         pageNumber: index,
         scale: baseScale * zoom,
-        rotation,
         theme: colors,
       }))
     }
@@ -683,7 +684,7 @@ function SgvBody(props) {
     tool('in', ICONS.zoomIn, TEXT.zoomIn, () => zoomBy(0.1)),
     tool('fitWidth', ICONS.fitWidth, TEXT.fitWidthLabel, () => { setFitMode('width'); setZoom(1) }),
     tool('fitHeight', ICONS.fitHeight, TEXT.fitHeightLabel, () => { setFitMode('height'); setZoom(1) }),
-    tool('rotate', ICONS.rotate, TEXT.rotate, () => setRotation((value) => (value + 90) % 360)),
+    tool('layout', layout === 'fluid' ? ICONS.paged : ICONS.scroll, layout === 'fluid' ? TEXT.toPaged : TEXT.toScroll, () => setLayout((value) => (value === 'fluid' ? 'a4' : 'fluid'))),
     tool('download', ICONS.download, TEXT.download, downloadPdf),
     tool('print', ICONS.print, TEXT.print, printPdf),
     tool('open', ICONS.open, TEXT.openInApp, openInSgv),
